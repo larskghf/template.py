@@ -34,8 +34,6 @@ buildDocker:release:
 buildDocker:MR:
   image: harbor.arz.de/arz-baseimages/buildtool
   stage: buildDocker
-  extends:
-    - .rules-only-mr
   tags:
     - homelab
     - docker
