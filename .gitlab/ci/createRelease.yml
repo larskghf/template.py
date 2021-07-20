@@ -1,0 +1,13 @@
+create:
+  stage: release
+  image: harbor.arz.de/arz-baseimages/buildtool:latest
+  tags:
+    - homelab
+    - docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  script:
+    - semantic-release --provider git --dry -f --force-bump-patch-version --changelog CHANGELOG.md
+    - export VERSION=v$(cat .version-unreleased)
+    - release-cli create --name ${VERSION} --tag-name ${VERSION} --ref ${CI_COMMIT_SHA} --description CHANGELOG.md

@@ -1,0 +1,62 @@
+buildDocker:release:
+  image: harbor.arz.de/arz-baseimages/buildtool
+  stage: buildDocker
+  tags:
+    - homelab
+    - docker
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+.*/'
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+.*/'
+  services:
+    - docker:20.10.5-dind
+  variables:
+    IMAGE: kghf/template.py
+    DOCKER_FILE: ./Dockerfile
+    DOCKER_CONTEXT: .
+  before_script:
+    - echo "== Docker Login =="
+    - echo ${IMAGE_REGISTRY_PASS} | docker login --password-stdin --username ${IMAGE_REGISTRY_USER} ${IMAGE_REGISTRY}
+    - export VERSION=
+  script:
+    - echo "== Docker Build =="
+    - docker build
+      -f ${DOCKER_FILE} ${DOCKER_CONTEXT}
+      --tag ${IMAGE}:${CI_COMMIT_TAG}
+      --tag ${IMAGE}:latest
+    - docker push ${IMAGE}:${CI_COMMIT_SHORT_SHA}.${TIMESTAMP}
+    - docker push ${IMAGE}:latest
+    - echo "== Cleanup =="
+    - docker image rm ${IMAGE}:${CI_COMMIT_TAG}
+    - docker image rm ${IMAGE}:latest
+
+
+
+buildDocker:MR:
+  image: harbor.arz.de/arz-baseimages/buildtool
+  stage: buildDocker
+  extends:
+    - .rules-only-mr
+  tags:
+    - homelab
+    - docker
+  rules:
+    - if: '$CI_MERGE_REQUEST_ID'
+  services:
+    - docker:20.10.5-dind
+  variables:
+    IMAGE: kghf/template.py
+    DOCKER_FILE: ./Dockerfile
+    DOCKER_CONTEXT: .
+  before_script:
+    - echo "== Docker Login =="
+    - echo ${IMAGE_REGISTRY_PASS} | docker login --password-stdin --username ${IMAGE_REGISTRY_USER} ${IMAGE_REGISTRY}
+    - export VERSION=
+  script:
+    - echo "== Docker Build =="
+    - docker build
+      -f ${DOCKER_FILE} ${DOCKER_CONTEXT}
+      --tag ${IMAGE}:${VERSION}
+      --tag ${IMAGE}:latest
+    - docker push ${IMAGE}:MR${CI_MERGE_REQUEST_IID}.${CI_COMMIT_SHORT_SHA}
+    - echo "== Cleanup =="
+    - docker image rm ${IMAGE}:${CI_COMMIT_SHORT_SHA}.${TIMESTAMP}

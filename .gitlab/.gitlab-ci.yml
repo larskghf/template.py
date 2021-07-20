@@ -1,0 +1,9 @@
+stages:
+  - release
+  - buildDocker
+include:
+  ## Locals
+  # Create Release
+  - local: '.gitlab/ci/createRelease.yml'
+  # Build
+  - local: '.gitlab/ci/buildDocker.yml'
