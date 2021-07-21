@@ -27,7 +27,7 @@ buildDocker:release:
     - echo "== Cleanup =="
     - docker image rm ${IMAGE}:${CI_COMMIT_TAG}
     - docker image rm ${IMAGE}:latest
-    - docker image prune -a -f
+    - docker image prune -f
 
 
 buildDocker:MR:
@@ -55,4 +55,4 @@ buildDocker:MR:
     - docker push ${IMAGE}:MR${CI_MERGE_REQUEST_IID}.${CI_COMMIT_SHORT_SHA}
     - echo "== Cleanup =="
     - docker image rm ${IMAGE}:MR${CI_MERGE_REQUEST_IID}.${CI_COMMIT_SHORT_SHA}
-    - docker image prune -a -f
+    - docker image prune -f
