@@ -11,3 +11,5 @@ create:
     - semantic-release --provider git --dry -f --force-bump-patch-version --changelog CHANGELOG.md
     - export VERSION=v$(cat .version-unreleased)
     - release-cli create --name ${VERSION} --tag-name ${VERSION} --ref ${CI_COMMIT_SHA} --description CHANGELOG.md
+    - gh auth login --with-token ${GH_TOKEN}
+    - gh release create $VERSION -F CHANGELOG.md --repo larskghf/template.py ./template.py
