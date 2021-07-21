@@ -1,5 +1,5 @@
 buildDocker:release:
-  image: harbor.arz.de/arz-baseimages/buildtool
+  image: kghf/gitlab-build-image:latest
   stage: buildDocker
   tags:
     - homelab
@@ -32,7 +32,7 @@ buildDocker:release:
 
 
 buildDocker:MR:
-  image: harbor.arz.de/arz-baseimages/buildtool
+  image: kghf/gitlab-build-image:latest
   stage: buildDocker
   tags:
     - homelab

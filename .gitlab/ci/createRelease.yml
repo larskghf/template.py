@@ -1,6 +1,6 @@
 create:
+  image: kghf/gitlab-build-image:latest
   stage: release
-  image: harbor.arz.de/arz-baseimages/buildtool:latest
   tags:
     - homelab
     - docker
