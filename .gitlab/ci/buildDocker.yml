@@ -8,9 +8,11 @@ buildDocker:release:
     - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+.*/'
     - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+.*/'
   services:
-    - docker:20.10.5-dind
+    - docker:20.10.7-dind
   variables:
-    IMAGE: kghf/template.py
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    IMAGE: larskghf/template.py
     DOCKER_FILE: ./Dockerfile
     DOCKER_CONTEXT: .
   before_script:
@@ -18,17 +20,12 @@ buildDocker:release:
     - echo ${IMAGE_REGISTRY_PASS} | docker login --password-stdin --username ${IMAGE_REGISTRY_USER} ${IMAGE_REGISTRY}
   script:
     - echo "== Docker Build =="
-    - docker build
+    - docker buildx build
+      --platform linux/amd64,linux/arm64
       -f ${DOCKER_FILE} ${DOCKER_CONTEXT}
       --tag ${IMAGE}:${CI_COMMIT_TAG}
       --tag ${IMAGE}:latest
-    - docker push ${IMAGE}:${CI_COMMIT_TAG}
-    - docker push ${IMAGE}:latest
-    - echo "== Cleanup =="
-    - docker image rm ${IMAGE}:${CI_COMMIT_TAG}
-    - docker image rm ${IMAGE}:latest
-    - docker image prune -f
-
+      --push
 
 buildDocker:MR:
   image: docker:20.10.7-dind
@@ -41,7 +38,9 @@ buildDocker:MR:
   services:
     - docker:20.10.7-dind
   variables:
-    IMAGE: kghf/template.py
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    IMAGE: larskghf/template.py
     DOCKER_FILE: ./Dockerfile
     DOCKER_CONTEXT: .
   before_script:
@@ -49,10 +48,9 @@ buildDocker:MR:
     - echo ${IMAGE_REGISTRY_PASS} | docker login --password-stdin --username ${IMAGE_REGISTRY_USER} ${IMAGE_REGISTRY}
   script:
     - echo "== Docker Build =="
-    - docker build
+    - docker buildx build
+      --platform linux/amd64,linux/arm64
       -f ${DOCKER_FILE} ${DOCKER_CONTEXT}
       --tag ${IMAGE}:MR${CI_MERGE_REQUEST_IID}.${CI_COMMIT_SHORT_SHA}
-    - docker push ${IMAGE}:MR${CI_MERGE_REQUEST_IID}.${CI_COMMIT_SHORT_SHA}
-    - echo "== Cleanup =="
-    - docker image rm ${IMAGE}:MR${CI_MERGE_REQUEST_IID}.${CI_COMMIT_SHORT_SHA}
-    - docker image prune -f
+      --push
+
