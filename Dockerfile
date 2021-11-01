@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 #update image to latest version and clear apt lists
 RUN apt-get update && \
