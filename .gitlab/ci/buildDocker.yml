@@ -1,5 +1,5 @@
 buildDocker:release:
-  image: docker:20.10.7-dind
+  image: kghf/gitlab-build-image
   stage: buildDocker
   tags:
     - homelab
@@ -28,7 +28,7 @@ buildDocker:release:
       --push
 
 buildDocker:MR:
-  image: docker:20.10.7-dind
+  image: kghf/gitlab-build-image
   stage: buildDocker
   tags:
     - homelab
