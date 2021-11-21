@@ -46,7 +46,6 @@ class TemplateFile:
         # set output
         self.output = encrypted.decode()
         # get filename and add ".enc" to string
-        self.outputFilename = self.getFilename()
         self.outputFilename = f"{self.outputFilename}.enc"
         return self.output
     def decrypt(self, key):
