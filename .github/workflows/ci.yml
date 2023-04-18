@@ -36,7 +36,7 @@ jobs:
   build-docker:
     runs-on: ubuntu-latest
     if: github.ref_name == 'master'
-    needs: release
+    needs: [release, build-python]
     steps:
       - uses: actions/checkout@v3
 

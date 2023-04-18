@@ -1,3 +1,9 @@
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/larskghf/template.py/ci.yml?style=for-the-badge)
+![Docker Pulls](https://img.shields.io/docker/pulls/larskghf/template.py?style=for-the-badge)
+![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/larskghf/template.py?style=for-the-badge)
+
+
+
 # :memo: template.py
 
 `template.py` is a simple python-based templating engine. It allows you to define templates for configuration files,
