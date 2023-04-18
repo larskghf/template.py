@@ -13,6 +13,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     if: github.ref_name == 'master'
+    outputs:
+      version: ${{ steps.semrel.outputs.version }}
     permissions:
       contents: write
     steps:
@@ -53,7 +55,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           tags: |
-            ${{ env.DOCKER_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.semrel.outputs.version }}
+            ${{ env.DOCKER_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:${{ jobs.release.outputs.version }}
             ${{ env.DOCKER_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
   build-python:
@@ -76,7 +78,7 @@ jobs:
         env:
           TWINE_USERNAME: $
           TWINE_PASSWORD: $
-          __VERSION__: ${{ github.ref_name }}
+          __VERSION__: ${{ github.sha }}
         run: |
           python setup.py sdist bdist_wheel
 
@@ -85,7 +87,7 @@ jobs:
         env:
           TWINE_USERNAME: lars.kghf
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-          __VERSION__: ${{ steps.semrel.outputs.version }}
+          __VERSION__: ${{ jobs.release.outputs.version }}
         run: |
           python setup.py sdist bdist_wheel
           twine upload dist/*
