@@ -36,6 +36,7 @@ jobs:
   build-docker:
     runs-on: ubuntu-latest
     if: github.ref_name == 'master'
+    needs: release
     steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -55,11 +56,12 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           tags: |
-            ${{ env.DOCKER_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:${{ jobs.release.outputs.version }}
+            ${{ env.DOCKER_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:${{ needs.release.outputs.version }}
             ${{ env.DOCKER_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
   build-python:
     runs-on: ubuntu-latest
+    needs: release
     steps:
       - uses: actions/checkout@v2
 
@@ -87,7 +89,7 @@ jobs:
         env:
           TWINE_USERNAME: lars.kghf
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-          __VERSION__: ${{ jobs.release.outputs.version }}
+          __VERSION__: ${{ needs.release.outputs.version }}
         run: |
           python setup.py sdist bdist_wheel
           twine upload dist/*
