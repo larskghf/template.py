@@ -4,6 +4,14 @@
 which can be customized with values from environment variables or a variable file. Additionally, it provides the option
 to encrypt and decrypt the resulting files.
 
+## 💻 Installation
+
+You can install `template.py` using pip:
+
+```bash
+pip install tpl.py
+```
+
 ## 🚀 Usage
 
 ```bash
