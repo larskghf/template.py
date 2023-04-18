@@ -1,8 +1,9 @@
 name: CI
 on:
   push:
-    branches: [ "master" ]
-  workflow_dispatch:
+    branches:
+      - '**'
+
 
 env:
   DOCKER_REPO: larskghf
@@ -11,36 +12,86 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: github.ref_name == 'master'
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-go@v3
         with:
           go-version: 1.19
+
       - name: Generate changelog and create release
+        id: semrel
         uses: go-semantic-release/action@v1
         with:
           github-token: ${{ secrets.GH_TOKEN }}
           changelog-generator-opt: "emojis=true"
           force-bump-patch-version: true
-      - uses: actions-ecosystem/action-get-latest-tag@v1
-        id: get-latest-tag
+
+
+  build-docker:
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'master'
+    steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: larskghf
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: setup buildx env
         uses: docker/setup-buildx-action@v2
         with:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
-      - name: Build Docker image
+
+      - name: Build Docker Image and push
         uses: docker/build-push-action@v2
         with:
           context: .
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
           tags: |
-            ${{ env.DOCKER_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.get-latest-tag.outputs.tag }}
+            ${{ env.DOCKER_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:${{ steps.semrel.outputs.version }}
             ${{ env.DOCKER_REPO }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+
+  build-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine
+
+      - name: Build branch version
+        if: github.ref_name != 'master'
+        env:
+          TWINE_USERNAME: $
+          TWINE_PASSWORD: $
+          __VERSION__: ${{ github.ref_name }}
+        run: |
+          python setup.py sdist bdist_wheel
+
+      - name: Build and publish
+        if: github.ref_name == 'master'
+        env:
+          TWINE_USERNAME: lars.kghf
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+          __VERSION__: ${{ steps.semrel.outputs.version }}
+        run: |
+          python setup.py sdist bdist_wheel
+          twine upload dist/*
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: tpl.py.tar.gz
+          path: dist/tpl.py-*.tar.gz

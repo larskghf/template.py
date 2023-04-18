@@ -9,5 +9,5 @@ RUN apt-get update && \
     && apt-get clean && apt-get autoremove && rm -Rf /var/lib/apt/lists/* && rm -Rf /var/cache/apt && \
     pip3 install jinja2
 
-COPY template.py /usr/local/bin/template.py
+COPY template_py/template_py.py /usr/local/bin/template.py
 RUN chmod +x /usr/local/bin/template.py
